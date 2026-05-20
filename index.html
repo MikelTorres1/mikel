@@ -458,6 +458,8 @@ header{background:rgba(0,0,0,.92);border-bottom:1px solid var(--border);padding:
 let mem=JSON.parse(localStorage.getItem('mem')||'[]');
 let uSet=JSON.parse(localStorage.getItem('uSet')||'{"name":"Mikel","pin":"2007","accent":"blue"}');
 let uCls=JSON.parse(localStorage.getItem('uCls')||'[{"code":"BNAD 303","name":"Marketing","time":"8:00 AM","days":"Tue/Thu"},{"code":"ECON 200","name":"Basic Economics","time":"9:30 AM","days":"Tue/Thu"},{"code":"ESOC 150B1","name":"Social Media","time":"11:00 AM","days":"Mon/Wed"}]');
+function migrateStorage(){const oldKey=localStorage.getItem('anthropic_api_key');if(!localStorage.getItem('groqKey')&&oldKey&&oldKey.startsWith('gsk_'))localStorage.setItem('groqKey',oldKey);const oldVis=localStorage.getItem('savedVisuals');if(!localStorage.getItem('savedVis')&&oldVis)localStorage.setItem('savedVis',oldVis);}
+migrateStorage();
 let groqKey=localStorage.getItem('groqKey')||'';
 const accentMap={blue:['#3b82f6','#1d4ed8'],purple:['#8b5cf6','#6d28d9'],green:['#10b981','#065f46'],orange:['#f59e0b','#d97706'],red:['#ef4444','#b91c1c'],pink:['#ec4899','#9d174d']};
 function applySaved(){const k=uSet.accent||'blue',[a,d]=accentMap[k]||accentMap.blue;document.documentElement.style.setProperty('--accent',a);document.documentElement.style.setProperty('--adark',d);document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));const sw=document.getElementById('sw-'+k);if(sw)sw.classList.add('on');const el=document.getElementById('greetName');if(el)el.textContent=uSet.name||'Mikel';}
