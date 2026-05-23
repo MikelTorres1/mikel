@@ -88,7 +88,7 @@ header{background:rgba(0,0,0,.92);border-bottom:1px solid var(--border);padding:
 
 <div id="dashLock" style="display:none;" class="overlay"><div class="modal">
   <div class="micon" style="background:linear-gradient(135deg,var(--accent),var(--adark));">🔐</div>
-  <div class="mtitle">Dashboard</div><div class="msub">Enter your PIN</div>
+  <div class="mtitle" id="lockTitle">Dashboard</div><div class="msub" id="lockSub">Enter your PIN</div>
   <input class="minput" id="dashPw" type="password" maxlength="4" placeholder="••••">
   <button class="mbtn" style="background:linear-gradient(135deg,var(--accent),var(--adark));color:#fff;" onclick="dashUnlock()">Unlock →</button>
   <div class="merr" id="dashErr"></div>
@@ -116,11 +116,11 @@ header{background:rgba(0,0,0,.92);border-bottom:1px solid var(--border);padding:
 </header>
 
 <nav class="tabs">
-  <button class="tab" onclick="tryDash(this)">🏠 Dashboard</button>
+  <button class="tab" onclick="tryProtected('home',this)">🏠 Dashboard</button>
   <button class="tab on" onclick="goTab('calendar',this)">📅 Calendar</button>
   <button class="tab" onclick="goTab('ai',this)">✦ Assistant</button>
   <button class="tab" onclick="goTab('study',this)">📊 Study</button>
-  <button class="tab" onclick="goTab('settings',this)">⚙️ Settings</button>
+  <button class="tab" onclick="tryProtected('settings',this)">⚙️ Settings</button>
 </nav>
 <div id="app">
 
@@ -420,7 +420,7 @@ header{background:rgba(0,0,0,.92);border-bottom:1px solid var(--border);padding:
     </div>
     <div class="ss"><div class="st">👤 Profile</div>
       <div class="sr"><div><div style="font-size:13px;font-weight:500;">Name</div><div style="font-size:11px;color:var(--muted);">Used in greetings</div></div><input class="si" id="sName" placeholder="Mikel"></div>
-      <div class="sr"><div><div style="font-size:13px;font-weight:500;">Dashboard PIN</div><div style="font-size:11px;color:var(--muted);">4-digit lock</div></div><input class="si" id="sPin" type="password" maxlength="4" placeholder="••••"></div>
+      <div class="sr"><div><div style="font-size:13px;font-weight:500;">Dashboard PIN</div><div style="font-size:11px;color:var(--muted);">4-digit lock</div></div><input class="si" id="sPin" type="password" maxlength="4" inputmode="numeric" pattern="[0-9]*" placeholder="Keep current PIN"></div>
       <div style="margin-top:12px;"><button class="ssave" onclick="saveProfile()">Save Profile</button></div>
     </div>
     <div class="ss"><div class="st">🎨 Accent Color</div>
@@ -463,7 +463,7 @@ const accentMap={blue:['#3b82f6','#1d4ed8'],purple:['#8b5cf6','#6d28d9'],green:[
 function applySaved(){const k=uSet.accent||'blue',[a,d]=accentMap[k]||accentMap.blue;document.documentElement.style.setProperty('--accent',a);document.documentElement.style.setProperty('--adark',d);document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));const sw=document.getElementById('sw-'+k);if(sw)sw.classList.add('on');const el=document.getElementById('greetName');if(el)el.textContent=uSet.name||'Mikel';}
 function saveKey(){const k=document.getElementById('apiIn').value.trim();if(!k.startsWith('gsk_')){document.getElementById('apiErr').textContent='Key should start with gsk_';return;}groqKey=k;localStorage.setItem('groqKey',k);document.getElementById('apiSetup').style.display='none';initApp();}
 function resetKey(){localStorage.removeItem('groqKey');groqKey='';document.getElementById('apiSetup').style.display='flex';}
-function saveProfile(){uSet.name=document.getElementById('sName').value.trim()||'Mikel';uSet.pin=document.getElementById('sPin').value||'2007';localStorage.setItem('uSet',JSON.stringify(uSet));const el=document.getElementById('greetName');if(el)el.textContent=uSet.name;toast('Profile saved!');}
+function saveProfile(){const pinEl=document.getElementById('sPin'),nextPin=pinEl.value.trim();if(nextPin&&!/^\d{4}$/.test(nextPin)){toast('PIN must be 4 digits');pinEl.focus();return;}uSet.name=document.getElementById('sName').value.trim()||'Mikel';if(nextPin){uSet.pin=nextPin;pinEl.value='';}localStorage.setItem('uSet',JSON.stringify(uSet));const el=document.getElementById('greetName');if(el)el.textContent=uSet.name;toast('Profile saved!');}
 function setAccent(a,d,key){uSet.accent=key;localStorage.setItem('uSet',JSON.stringify(uSet));document.documentElement.style.setProperty('--accent',a);document.documentElement.style.setProperty('--adark',d);document.querySelectorAll('.sw').forEach(s=>s.classList.remove('on'));const sw=document.getElementById('sw-'+key);if(sw)sw.classList.add('on');toast('Color updated!');}
 function addMem(){const v=document.getElementById('memIn').value.trim();if(!v)return;mem.push(v);localStorage.setItem('mem',JSON.stringify(mem));document.getElementById('memIn').value='';renderMem();}
 function removeMem(i){mem.splice(i,1);localStorage.setItem('mem',JSON.stringify(mem));renderMem();}
@@ -471,13 +471,14 @@ function clearMem(){mem=[];localStorage.setItem('mem',JSON.stringify(mem));rende
 function renderMem(){const c=document.getElementById('memChips');if(!c)return;c.innerHTML=mem.length?mem.map((m,i)=>`<span class="chip">${m}<button onclick="removeMem(${i})">x</button></span>`).join(''):'<span style="font-size:12px;color:var(--muted);">No memories yet.</span>';}
 function addClsRow(cls){cls=cls||{code:'',name:'',time:'',days:''};const c=document.getElementById('clsSettings');const d=document.createElement('div');d.style.cssText='display:flex;gap:7px;align-items:center;flex-wrap:wrap;';d.innerHTML=`<input class="field" placeholder="Code" value="${cls.code}" style="width:80px;flex:0 0 80px;"><input class="field" placeholder="Name" value="${cls.name}" style="flex:1;min-width:120px;"><input class="field" placeholder="Time" value="${cls.time}" style="width:90px;flex:0 0 90px;"><input class="field" placeholder="Days" value="${cls.days}" style="width:80px;flex:0 0 80px;"><button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;">x</button>`;c.appendChild(d);}
 function saveCls(){const rows=document.querySelectorAll('#clsSettings > div');uCls=Array.from(rows).map(r=>{const ins=r.querySelectorAll('input');return{code:ins[0].value,name:ins[1].value,time:ins[2].value,days:ins[3].value};}).filter(c=>c.code);localStorage.setItem('uCls',JSON.stringify(uCls));renderUofaDays();renderUofaList();toast('Classes saved!');}
-function initSettings(){document.getElementById('sName').value=uSet.name||'Mikel';document.getElementById('sPin').value=uSet.pin||'2007';renderMem();const c=document.getElementById('clsSettings');c.innerHTML='';uCls.forEach(cl=>addClsRow(cl));}
+function initSettings(){document.getElementById('sName').value=uSet.name||'Mikel';document.getElementById('sPin').value='';renderMem();const c=document.getElementById('clsSettings');c.innerHTML='';uCls.forEach(cl=>addClsRow(cl));}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.transform='translateX(-50%) translateY(0)';setTimeout(()=>t.style.transform='translateX(-50%) translateY(80px)',2000);}
 
 // LOCK
-let unlocked=false,pendBtn=null;
-function tryDash(btn){if(unlocked){goTab('home',btn);return;}pendBtn=btn;document.getElementById('dashLock').style.display='flex';setTimeout(()=>document.getElementById('dashPw').focus(),100);}
-function dashUnlock(){const pw=document.getElementById('dashPw').value,pin=uSet.pin||'2007';if(pw===pin){unlocked=true;hideLock();if(pendBtn)goTab('home',pendBtn);}else{const el=document.getElementById('dashPw');el.classList.add('err');document.getElementById('dashErr').textContent='Wrong PIN';setTimeout(()=>{el.classList.remove('err');el.value='';el.focus();},600);}}
+let unlocked=false,pendBtn=null,pendTab='home';
+const protectedTabs={home:'Dashboard',settings:'Settings'};
+function tryProtected(id,btn){if(unlocked){goTab(id,btn);return;}pendBtn=btn;pendTab=id;document.getElementById('lockTitle').textContent=protectedTabs[id]||'Protected Area';document.getElementById('lockSub').textContent='Enter your PIN to continue';document.getElementById('dashLock').style.display='flex';setTimeout(()=>document.getElementById('dashPw').focus(),100);}
+function dashUnlock(){const pw=document.getElementById('dashPw').value,pin=uSet.pin||'2007';if(pw===pin){unlocked=true;hideLock();if(pendBtn)goTab(pendTab,pendBtn);}else{const el=document.getElementById('dashPw');el.classList.add('err');document.getElementById('dashErr').textContent='Wrong PIN';setTimeout(()=>{el.classList.remove('err');el.value='';el.focus();},600);}}
 function hideLock(){document.getElementById('dashLock').style.display='none';document.getElementById('dashPw').value='';document.getElementById('dashErr').textContent='';}
 document.getElementById('dashPw').addEventListener('keydown',e=>{if(e.key==='Enter')dashUnlock();});
 
