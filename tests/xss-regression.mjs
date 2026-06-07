@@ -126,7 +126,7 @@ const output = execFileSync('timeout', [
   harnessPath,
 ], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
 
-const match = output.match(/<pre id="xss-regression-result">([^<]+)<\\/pre>/);
+const match = output.match(/<pre id="xss-regression-result">([^<]+)<\/pre>/);
 if (!match) {
   throw new Error('XSS regression result marker was not found in Chrome output');
 }
