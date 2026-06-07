@@ -109,22 +109,32 @@ END:VCALENDAR`)});
 const html = source.replace('<script>', `${prelude}<script>`).replace('</body>', `${verifier}</body>`);
 const dir = mkdtempSync(join(tmpdir(), 'mikel-xss-'));
 const harnessPath = join(dir, 'harness.html');
+const profilePath = join(dir, 'chrome-profile');
 writeFileSync(harnessPath, html);
 
 const chrome = process.env.CHROME_BIN || '/usr/local/bin/google-chrome';
-const output = execFileSync('timeout', [
-  '--kill-after=2s',
-  '12s',
-  chrome,
-  '--headless=new',
-  '--no-sandbox',
-  '--disable-gpu',
-  '--disable-dev-shm-usage',
-  '--run-all-compositor-stages-before-draw',
-  '--virtual-time-budget=3000',
-  '--dump-dom',
-  harnessPath,
-], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
+let output = '';
+try {
+  output = execFileSync('timeout', [
+    '--kill-after=2s',
+    '12s',
+    chrome,
+    '--headless=new',
+    '--no-sandbox',
+    '--disable-gpu',
+    '--disable-dev-shm-usage',
+    `--user-data-dir=${profilePath}`,
+    '--run-all-compositor-stages-before-draw',
+    '--virtual-time-budget=3000',
+    '--dump-dom',
+    harnessPath,
+  ], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
+} catch (error) {
+  output = error.stdout || '';
+  if (error.status !== 124 || !output) {
+    throw error;
+  }
+}
 
 const match = output.match(/<pre id="xss-regression-result">([^<]+)<\/pre>/);
 if (!match) {
