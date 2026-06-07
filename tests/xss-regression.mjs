@@ -106,7 +106,12 @@ END:VCALENDAR`)});
 })();
 </script>`;
 
-const html = source.replace('<script>', `${prelude}<script>`).replace('</body>', `${verifier}</body>`);
+const withPrelude = source.replace('<script>', `${prelude}<script>`);
+const bodyClose = withPrelude.lastIndexOf('</body>');
+if (bodyClose === -1) {
+  throw new Error('closing body tag not found');
+}
+const html = `${withPrelude.slice(0, bodyClose)}${verifier}${withPrelude.slice(bodyClose)}`;
 const dir = mkdtempSync(join(tmpdir(), 'mikel-xss-'));
 const harnessPath = join(dir, 'harness.html');
 const profilePath = join(dir, 'chrome-profile');
