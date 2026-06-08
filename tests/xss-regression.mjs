@@ -121,7 +121,7 @@ const profileDir = path.join(tempDir, 'chrome-profile');
 writeFileSync(tempHtml, instrumented);
 
 const chrome = process.env.CHROME_BIN || '/usr/local/bin/google-chrome';
-const result = spawnSync(chrome, [
+const chromeArgs = [
   '--headless=new',
   '--no-sandbox',
   '--disable-gpu',
@@ -130,7 +130,8 @@ const result = spawnSync(chrome, [
   '--virtual-time-budget=5000',
   '--dump-dom',
   pathToFileURL(tempHtml).href,
-], { encoding: 'utf8', timeout: 15000 });
+];
+const result = spawnSync('timeout', ['--kill-after=2s', '12s', chrome, ...chromeArgs], { encoding: 'utf8', timeout: 16000 });
 
 try {
   if (result.error) throw result.error;
