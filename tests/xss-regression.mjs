@@ -83,7 +83,14 @@ const verifier = String.raw`
 `;
 
 try {
-  const harness = index.replace('<script>', prelude + '<script>').replace('</body>', verifier + '</body>');
+  const scriptIndex = index.indexOf('<script>');
+  const bodyIndex = index.lastIndexOf('</body>');
+  if (scriptIndex === -1 || bodyIndex === -1) {
+    throw new Error('Could not locate script or body injection point');
+  }
+  const withPrelude = index.slice(0, scriptIndex) + prelude + index.slice(scriptIndex);
+  const adjustedBodyIndex = bodyIndex + prelude.length;
+  const harness = withPrelude.slice(0, adjustedBodyIndex) + verifier + withPrelude.slice(adjustedBodyIndex);
   const harnessPath = join(workDir, 'harness.html');
   const userDataDir = join(workDir, 'chrome-profile');
   writeFileSync(harnessPath, harness);
