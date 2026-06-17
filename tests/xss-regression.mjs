@@ -12,6 +12,8 @@ const profileDir = join(workDir, 'chrome-profile');
 
 const scriptTag = (id, code) => `<scr` + `ipt id="${id}">\n${code}\n</scr` + `ipt>`;
 const payload = (label) => `<img src=x onerror="window.__xss('${label}')">`;
+const htmlPayload = (label) => `<div onclick="window.__xss('${label}-click')" style="background:url(javascript:window.__xss('${label}-style'));color:red"><img src=x onerror="window.__xss('${label}-img')"><strong>${label} safe text</strong><script>window.__xss('${label}-script')</script></div>`;
+const jsString = (value) => JSON.stringify(value).replace(/<\/script/gi, '<\\/script');
 
 const prelude = String.raw`
 window.__xssHits = [];
@@ -26,7 +28,7 @@ localStorage.setItem('savedVis', JSON.stringify([{
   type:'summary',
   label:${JSON.stringify(payload('saved-label'))},
   notes:${JSON.stringify(payload('saved-notes'))},
-  html:'<div onclick="window.__xss(\\'saved-click\\')" style="background:url(javascript:window.__xss(\\'saved-style\\'));color:red"><img src=x onerror="window.__xss(\\'saved-img\\')"><strong>Saved visual</strong><script>window.__xss(\\'saved-script\\')</'+'script></div>',
+  html:${jsString(htmlPayload('saved'))},
   date:${JSON.stringify(payload('saved-date'))}
 }]));
 window.fetch = async (url) => {
@@ -34,7 +36,7 @@ window.fetch = async (url) => {
   if (u.includes('finance')) {
     return {json: async () => ({quoteResponse:{result:[{symbol:"BAD');window.__xss('market');//",regularMarketChangePercent:1.23,regularMarketPrice:42,regularMarketChange:0.5}]}})};
   }
-  return {json: async () => ({choices:[{message:{content:'<div onclick="window.__xss(\\'ai-click\\')" style="background:url(javascript:window.__xss(\\'ai-style\\'));color:red"><img src=x onerror="window.__xss(\\'ai-img\\')"><strong>AI safe text</strong><script>window.__xss(\\'ai-script\\')</'+'script></div>'}}]})};
+  return {json: async () => ({choices:[{message:{content:${jsString(htmlPayload('ai'))}}}]})};
 };
 `;
 
@@ -61,13 +63,13 @@ const verifier = String.raw`
     renderTodos();
     renderSch();
     renderCal();
-    parseICS('BEGIN:VCALENDAR\nBEGIN:VEVENT\nSUMMARY:<img src=x onerror="window.__xss(\\'ics\\')">\nDTSTART:20990101T090000\nDTEND:20990101T100000\nEND:VEVENT\nEND:VCALENDAR');
+    parseICS('BEGIN:VCALENDAR\nBEGIN:VEVENT\nSUMMARY:<img src=x onerror="window.__xss(&quot;ics&quot;)">\nDTSTART:20990101T090000\nDTEND:20990101T100000\nEND:VEVENT\nEND:VCALENDAR');
     renderCal();
-    appendMsg('user', '<img src=x onerror="window.__xss(\\'chat-user\\')"> **bold**');
-    appendMsg('assistant', '<img src=x onerror="window.__xss(\\'chat-ai\\')"> **bold**');
-    document.getElementById('ddBox').innerHTML = formatDD('**Header**\n\n- <img src=x onerror="window.__xss(\\'deep-dive\\')">');
+    appendMsg('user', '<img src=x onerror="window.__xss(&quot;chat-user&quot;)"> **bold**');
+    appendMsg('assistant', '<img src=x onerror="window.__xss(&quot;chat-ai&quot;)"> **bold**');
+    document.getElementById('ddBox').innerHTML = formatDD('**Header**\n\n- <img src=x onerror="window.__xss(&quot;deep-dive&quot;)">');
     ddContext = 'context';
-    document.getElementById('ddFollowIn').value = '<img src=x onerror="window.__xss(\\'follow-question\\')">';
+    document.getElementById('ddFollowIn').value = '<img src=x onerror="window.__xss(&quot;follow-question&quot;)">';
     await sendDDFollow();
     loadVis(0);
     document.getElementById('studyIn').value = 'topic';
@@ -75,8 +77,8 @@ const verifier = String.raw`
     let printed = '';
     const oldOpen = window.open;
     window.open = () => ({document:{write: s => { printed += s; }, close(){}}, print(){}});
-    document.getElementById('visLbl').textContent = '<img src=x onerror="window.__xss(\\'print-label\\')">';
-    document.getElementById('visBox').innerHTML = safeInlineHTML('<div onclick="window.__xss(\\'print-click\\')"><img src=x onerror="window.__xss(\\'print-img\\')"><strong>Printable</strong></div>');
+    document.getElementById('visLbl').textContent = '<img src=x onerror="window.__xss(&quot;print-label&quot;)">';
+    document.getElementById('visBox').innerHTML = safeInlineHTML("<div onclick=\"window.__xss('print-click')\"><img src=x onerror=\"window.__xss('print-img')\"><strong>Printable</strong></div>");
     printVis();
     window.open = oldOpen;
     const printedDoc = document.implementation.createHTMLDocument('');
