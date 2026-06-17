@@ -44,7 +44,7 @@ const verifier = String.raw`
   const activeAttrs = (rootNode) => Array.from(rootNode.querySelectorAll('*')).flatMap(el =>
     Array.from(el.attributes || [])
       .filter(attr => (/^on/i.test(attr.name) || /javascript:/i.test(attr.value)) && /__xss|javascript:/i.test(attr.value))
-      .map(attr => `${el.tagName.toLowerCase()}[${attr.name}=${attr.value}]`)
+      .map(attr => el.tagName.toLowerCase() + '[' + attr.name + '=' + attr.value + ']')
   );
   const resultEl = document.createElement('pre');
   resultEl.id = '__xss_result';
@@ -91,7 +91,7 @@ const verifier = String.raw`
     const printedScripts = Array.from(printedDoc.scripts)
       .filter(script => /__xss/.test(script.textContent))
       .map(script => script.textContent.slice(0, 80));
-    const issues = [...active, ...printedActive.map(item => `print:${item}`), ...injectedScripts.map(item => `script:${item}`), ...printedScripts.map(item => `print-script:${item}`)];
+    const issues = [...active, ...printedActive.map(item => 'print:' + item), ...injectedScripts.map(item => 'script:' + item), ...printedScripts.map(item => 'print-script:' + item)];
     finish({ok: window.__xssHits.length === 0 && issues.length === 0, hits: window.__xssHits, issues});
   } catch (error) {
     finish({ok:false, error:String(error && error.stack || error), hits:window.__xssHits || []});
