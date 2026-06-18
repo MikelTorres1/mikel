@@ -4,7 +4,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const sourcePath = resolve('index.html');
-const source = readFileSync(sourcePath, 'utf8');
+const source = readFileSync(sourcePath, 'utf8')
+  .replace(/<link href="https:\/\/fonts\.googleapis\.com[^>]+>\s*/g, '');
 
 const seed = String.raw`<script>
 (() => {
@@ -112,8 +113,10 @@ try {
       chrome,
       '--headless=new',
       '--disable-gpu',
+      '--disable-background-networking',
       '--no-sandbox',
       '--disable-dev-shm-usage',
+      '--virtual-time-budget=6000',
       `--user-data-dir=${join(dir, 'profile')}`,
       '--dump-dom',
       `file://${htmlPath}`,
