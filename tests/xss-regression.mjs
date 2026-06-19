@@ -101,7 +101,7 @@ try {
   } catch (e) {
     output = `${e.stdout || ''}${e.stderr || ''}`;
   }
-  const match = output.match(/<pre id="xss-result">([^<]+)<\\/pre>/);
+  const match = output.match(/<pre id="xss-result">([^<]+)<\/pre>/);
   if (!match) {
     throw new Error('No XSS result found in Chrome output');
   }
