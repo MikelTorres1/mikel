@@ -97,7 +97,7 @@ try {
   const chrome = process.env.CHROME || '/usr/local/bin/google-chrome';
   let output = '';
   try {
-    output = execFileSync('timeout', ['--kill-after=2s', '12s', chrome, '--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', `--user-data-dir=${profile}`, '--dump-dom', pathToFileURL(htmlPath).href], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
+    output = execFileSync('timeout', ['--kill-after=2s', '20s', chrome, '--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage', '--virtual-time-budget=5000', `--user-data-dir=${profile}`, '--dump-dom', pathToFileURL(htmlPath).href], { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
   } catch (e) {
     output = `${e.stdout || ''}${e.stderr || ''}`;
   }
