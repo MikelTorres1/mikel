@@ -122,7 +122,7 @@ try {
     maxBuffer: 20 * 1024 * 1024
   });
   const output = run.stdout || '';
-  const match = output.match(/<pre id="xss-result">([^<]*)<\\/pre>/);
+  const match = output.match(/<pre id="xss-result">([^<]*)<\/pre>/);
   if (!match) {
     console.error(output);
     console.error(run.stderr);
