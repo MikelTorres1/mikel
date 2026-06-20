@@ -60,7 +60,8 @@ const exerciseScript = scriptTag(`
     initSettings();
     renderTodos();
     renderSch();
-    parseICS('BEGIN:VCALENDAR\\nBEGIN:VEVENT\\nSUMMARY:${payload('ics')}\\nDTSTART:' + ymd + 'T090000\\nDTEND:' + ymd + 'T100000\\nEND:VEVENT\\nEND:VCALENDAR');
+    const icsSummary = ${safeForScript(payload('ics'))};
+    parseICS('BEGIN:VCALENDAR\\nBEGIN:VEVENT\\nSUMMARY:' + icsSummary + '\\nDTSTART:' + ymd + 'T090000\\nDTEND:' + ymd + 'T100000\\nEND:VEVENT\\nEND:VCALENDAR');
     calToday();
     document.getElementById('evTitle').value = ${safeForScript(payload('calendar-title'))};
     document.getElementById('evDate').value = new Date().toISOString().slice(0, 10);
