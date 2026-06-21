@@ -94,7 +94,7 @@ writeFileSync(htmlPath, harness.slice(0, bodyClose + setup.length) + checker + h
 const chrome = process.env.CHROME_BIN || '/usr/local/bin/google-chrome';
 const res = spawnSync('timeout', ['--kill-after=2s', '20s', chrome, '--headless=new', '--no-sandbox', '--disable-gpu', '--run-all-compositor-stages-before-draw', '--virtual-time-budget=5000', `--user-data-dir=${profile}`, '--dump-dom', `file://${htmlPath}`], { encoding: 'utf8' });
 const output = `${res.stdout || ''}\n${res.stderr || ''}`;
-const match = output.match(/<pre id="xss-result">([^<]+)<\\/pre>/);
+const match = output.match(/<pre id="xss-result">([^<]+)<\/pre>/);
 rmSync(tmp, { recursive: true, force: true });
 if (!match) {
   throw new Error(`No XSS result found. status=${res.status}\n${output.slice(-2000)}`);
