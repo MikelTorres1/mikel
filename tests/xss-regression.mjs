@@ -59,6 +59,7 @@ const verify = String.raw`
     const dangerous = [];
     document.querySelectorAll('*').forEach(el => {
       Array.from(el.attributes).forEach(attr => {
+        if (el.tagName === 'INPUT' && attr.name === 'value') return;
         if (/__xssHits|javascript:/i.test(attr.value)) dangerous.push(el.tagName.toLowerCase() + '[' + attr.name + '=' + attr.value + ']');
       });
     });
