@@ -29,9 +29,11 @@ localStorage.setItem('uSet', JSON.stringify({name: window.__payload, pin: '2007'
 localStorage.setItem('mem', JSON.stringify([window.__payload]));
 localStorage.setItem('uCls', JSON.stringify([{code:${scriptString(attrPayload)},name:${scriptString(attrPayload)},time:${scriptString(attrPayload)},days:${scriptString(attrPayload)}}]));
 localStorage.setItem('todos', JSON.stringify([{id:"1);window.__xssHits.push('todo-id');//",text:window.__payload,p:'high',done:false}]));
-const schedule = {};
-for (let i = 0; i < 7; i++) schedule[i] = [{id:"1);window.__xssHits.push('schedule-id');//",time:window.__payload,title:window.__payload,sub:window.__payload}];
-localStorage.setItem('schedule', JSON.stringify(schedule));
+{
+  const seededSchedule = {};
+  for (let i = 0; i < 7; i++) seededSchedule[i] = [{id:"1);window.__xssHits.push('schedule-id');//",time:window.__payload,title:window.__payload,sub:window.__payload}];
+  localStorage.setItem('schedule', JSON.stringify(seededSchedule));
+}
 localStorage.setItem('savedVis', JSON.stringify([{type:'summary',label:window.__payload,notes:window.__payload,date:window.__payload,html:window.__visualPayload}]));
 window.fetch = async (url) => ({
   json: async () => String(url).includes('finance')
