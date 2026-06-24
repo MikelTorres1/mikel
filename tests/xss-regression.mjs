@@ -20,6 +20,8 @@ function scriptString(value) {
 const seedScript = `
 <script>
 window.__xssHits = [];
+window.__pageErrors = [];
+window.onerror = (...args) => window.__pageErrors.push(args.map(String).join(' | '));
 window.__payload = ${scriptString(payload)};
 window.__visualPayload = ${scriptString(visualPayload)};
 localStorage.setItem('groqKey','gsk_test');
@@ -46,6 +48,9 @@ const verifyScript = `
 (async () => {
   try {
     await new Promise(r => setTimeout(r, 150));
+    if (typeof tick !== 'function') {
+      throw new Error('dashboard script did not initialize: ' + JSON.stringify(window.__pageErrors));
+    }
     tick();
     renderTodos();
     initSettings();
