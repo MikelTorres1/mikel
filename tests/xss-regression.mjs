@@ -108,11 +108,22 @@ try {
     maxBuffer: 20 * 1024 * 1024
   });
   const output = `${run.stdout || ''}\n${run.stderr || ''}`;
-  const match = output.match(/__RESULT__(.*?)__END__/);
-  if (!match) {
+  const matches = [...output.matchAll(/__RESULT__(.*?)__END__/gs)];
+  if (!matches.length) {
     throw new Error(`XSS harness did not emit a result. status=${run.status} stderr=${run.stderr}`);
   }
-  const result = JSON.parse(match[1]);
+  let result;
+  for (const match of matches.reverse()) {
+    try {
+      result = JSON.parse(match[1]);
+      break;
+    } catch {
+      // Ignore the verifier source in --dump-dom; the appended result is JSON.
+    }
+  }
+  if (!result) {
+    throw new Error(`XSS harness emitted no parseable result. status=${run.status}`);
+  }
   if (!result.ok) {
     console.error(JSON.stringify(result, null, 2));
     process.exit(1);
