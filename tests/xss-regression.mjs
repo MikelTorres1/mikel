@@ -151,7 +151,7 @@ try {
   ], { encoding: 'utf8', maxBuffer: 20 * 1024 * 1024 });
 
   const output = `${result.stdout || ''}\\n${result.stderr || ''}`;
-  const match = output.match(/<pre id="__xss_result__">([^<]+)<\\/pre>/);
+  const match = output.match(/<pre id="__xss_result__">([^<]+)<\/pre>/);
   if (!match) {
     throw new Error(`XSS regression harness did not produce a result. status=${result.status}\\n${output.slice(-4000)}`);
   }
