@@ -131,7 +131,7 @@ const verifier = `
 })();
 </script>`;
 
-const scriptStart = page.indexOf('<script>\n// SETTINGS & MEMORY');
+const scriptStart = page.indexOf('<script>\nfunction escapeHTML');
 if (scriptStart === -1) throw new Error('Could not find application script start');
 const withPrelude = page.slice(0, scriptStart) + prelude + page.slice(scriptStart);
 const insertAt = withPrelude.lastIndexOf('</body>');
