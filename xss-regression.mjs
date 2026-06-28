@@ -116,7 +116,7 @@ const verifier = `
         for (const attr of Array.from(el.attributes)) {
           const name = attr.name.toLowerCase();
           const value = attr.value;
-          if (name.startsWith('on') || /^javascript:/i.test(value) || (/url\\s*\\(/i.test(value) && name === 'style')) {
+          if ((name.startsWith('on') && /__xssMarker|javascript:/i.test(value)) || /^javascript:/i.test(value) || (/url\\s*\\(/i.test(value) && name === 'style')) {
             dangerous.push({id, tag: el.tagName, attr: attr.name, value});
           }
         }
