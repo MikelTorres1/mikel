@@ -51,8 +51,8 @@ const verify = `${openScript}
   const ids=['greet','memChips','clsSettings','todoList','shiftList','schSlots','calEvents','aiMsgs','visBox','savedList','ddBox','mktGrid'];
   const dangerous=[];
   for(const id of ids){
-    const html=document.getElementById(id)?.innerHTML||'';
-    if(/<script|<iframe|<svg|<img|onerror\\s*=|onload\\s*=|javascript:|__xssHits\\.push/i.test(html)) dangerous.push(id);
+    const root=document.getElementById(id);
+    if(root?.querySelector('script,iframe,object,embed,svg,img,[onerror],[onload],[srcdoc],a[href^="javascript:"]')) dangerous.push(id);
   }
   const result={ok:window.__xssHits.length===0&&dangerous.length===0,hits:window.__xssHits,dangerous};
   const marker='__XSS_RESULT__'+btoa(JSON.stringify(result))+'__END__';
