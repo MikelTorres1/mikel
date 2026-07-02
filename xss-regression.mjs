@@ -61,17 +61,18 @@ const verify = `${openScript}
 })();
 ${closeScript}`;
 
-const insertAt = source.lastIndexOf('</body>');
-if (insertAt === -1) throw new Error('Could not find body close tag');
 const html = source.replace('<script>\n// SETTINGS', `${setup}\n<script>\n// SETTINGS`);
+const insertAt = html.search(/<\/body>\s*<\/html>\s*$/i);
+if (insertAt === -1) throw new Error('Could not find final body close tag');
 const harness = html.slice(0, insertAt) + verify + html.slice(insertAt);
 const dir = mkdtempSync(join(tmpdir(), 'mikel-xss-'));
 const file = join(dir, 'index.html');
+const userDataDir = join(dir, 'chrome-profile');
 writeFileSync(file, harness);
 
 try {
   const chrome = '/usr/local/bin/google-chrome';
-  const run = spawnSync('timeout', ['--kill-after=2s', '20s', chrome, '--headless=new', '--disable-gpu', '--no-sandbox', '--virtual-time-budget=5000', '--dump-dom', `file://${file}`], { encoding: 'utf8' });
+  const run = spawnSync('timeout', ['--kill-after=2s', '20s', chrome, '--headless=new', '--disable-gpu', '--no-sandbox', `--user-data-dir=${userDataDir}`, '--virtual-time-budget=5000', '--dump-dom', `file://${file}`], { encoding: 'utf8' });
   const output = `${run.stdout || ''}\n${run.stderr || ''}`;
   const match = output.match(/__XSS_RESULT__([A-Za-z0-9+/=]+)__END__/);
   if (!match) {
