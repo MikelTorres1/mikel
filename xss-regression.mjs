@@ -55,7 +55,9 @@ const verify = `${openScript}
     if(/<script|<iframe|<svg|<img|onerror\\s*=|onload\\s*=|javascript:|__xssHits\\.push/i.test(html)) dangerous.push(id);
   }
   const result={ok:window.__xssHits.length===0&&dangerous.length===0,hits:window.__xssHits,dangerous};
-  console.log('__XSS_RESULT__'+btoa(JSON.stringify(result))+'__END__');
+  const marker='__XSS_RESULT__'+btoa(JSON.stringify(result))+'__END__';
+  document.body.insertAdjacentHTML('beforeend','<pre id="xss-result">'+marker+'</pre>');
+  console.log(marker);
 })();
 ${closeScript}`;
 
