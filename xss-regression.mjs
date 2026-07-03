@@ -67,7 +67,7 @@ setTimeout(()=>{
       const dangerous=[];
       const active=[];
       for (const c of containers) {
-        for (const el of c.querySelectorAll('script,img,svg,math,iframe,object,embed,link,meta,form,input,textarea,select,audio,video,source,picture,canvas')) {
+        for (const el of c.querySelectorAll('script,img,svg,math,iframe,object,embed,link,meta,audio,video,source,picture,canvas')) {
           dangerous.push(c.id+':'+el.tagName.toLowerCase());
         }
         for (const el of c.querySelectorAll('*')) {
